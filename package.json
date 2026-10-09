@@ -1,0 +1,17 @@
+{
+  "name": "ascend-fintech-platform",
+  "version": "1.0.0",
+  "description": "Ascend - Full-Stack Fintech Platform with Passwordless Auth, 4-Step KYC, and Financial Analytics",
+  "private": true,
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "start": "npm --prefix backend run start",
+    "test": "npm --prefix backend test",
+    "seed": "npm --prefix backend run prisma:seed"
+  },
+  "keywords": ["fintech", "ascend", "react", "express", "prisma", "typescript"]
+}

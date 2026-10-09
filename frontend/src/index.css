@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background-color: #05080e;
+  color: #f1f5f9;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090e18;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00e599;
+}
+
+/* Reference image futuristic glow and cyber-financial aesthetic */
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.radial-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(0, 229, 153, 0.12) 0%, transparent 70%);
+}
+
+.neon-border {
+  border: 1px solid rgba(0, 229, 153, 0.3);
+  box-shadow: 0 0 15px rgba(0, 229, 153, 0.12), inset 0 0 15px rgba(0, 229, 153, 0.04);
+}
+
+.neon-border-hover:hover {
+  border-color: rgba(0, 229, 153, 0.6);
+  box-shadow: 0 0 20px rgba(0, 229, 153, 0.25);
+}
+
+.card-glass {
+  background: rgba(12, 18, 29, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}

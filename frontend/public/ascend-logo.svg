@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="ascendGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="50%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#00E599" />
+    </linearGradient>
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Concentric modern slices mimicking layered spherical ascent -->
+  <path d="M 50 10 A 40 40 0 0 1 85 30 L 68 36 A 25 25 0 0 0 50 24 Z" fill="url(#ascendGrad)" filter="url(#neonGlow)" />
+  <path d="M 30 20 A 40 40 0 0 1 90 50 L 73 50 A 25 25 0 0 0 40 30 Z" fill="url(#ascendGrad)" />
+  <path d="M 15 35 A 40 40 0 0 1 85 70 L 68 64 A 25 25 0 0 0 28 43 Z" fill="url(#ascendGrad)" />
+  <path d="M 10 50 A 40 40 0 0 1 70 85 L 56 73 A 25 25 0 0 0 24 50 Z" fill="url(#ascendGrad)" />
+  <path d="M 15 65 A 40 40 0 0 1 50 90 L 50 75 A 25 25 0 0 0 28 58 Z" fill="url(#ascendGrad)" />
+  <!-- Ascending arrow impulse -->
+  <circle cx="50" cy="50" r="8" fill="#00E599" filter="url(#neonGlow)" />
+</svg>

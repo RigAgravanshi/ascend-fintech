@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String        @id @default(uuid())
+  email                 String        @unique
+  profileCompleted      Boolean       @default(false)
+  currentStep           Int           @default(1)
+  
+  // Step 1: DOB
+  dob                   String?
+  age                   Int?
+  
+  // Step 2: DigiLocker KYC
+  aadhaarLast4          String?
+  digilockerVerified    Boolean       @default(false)
+  digilockerRef         String?
+  
+  // Step 3: Personal & Income
+  fullName              String?
+  phone                 String?
+  addressStreet         String?
+  addressCity           String?
+  addressState          String?
+  addressPincode        String?
+  annualIncome          Float?
+  incomeSource          String?
+  incomeProofPath       String?
+  incomeProofOriginalName String?
+  
+  // Step 4: Bank Details (Encrypted at rest)
+  encryptedBankDetails  String?
+  bankDetailsSaved      Boolean       @default(false)
+  
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  creditCards           CreditCard[]
+  loans                 Loan[]
+  creditScores          CreditScore[]
+}
+
+model OtpCode {
+  id        String   @id @default(uuid())
+  email     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  used      Boolean  @default(false)
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+model CreditCard {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cardholderName String
+  cardName       String
+  last4          String
+  creditLimit    Float
+  amountSpent    Float
+  statementDate  DateTime
+  dueDate        DateTime
+  minimumDue     Float
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Loan {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productName String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CreditScore {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score      Int
+  bureauName String
+  fetchedAt  DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
