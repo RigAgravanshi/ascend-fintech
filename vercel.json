@@ -1,3 +1,4 @@
+
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
@@ -11,6 +12,60 @@
     }
   },
   "rewrites": [
+    {
+      "source": "/auth/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/profile",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/profile/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/kyc/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/home/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/cards",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/loans",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/credit-score",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/calculator/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
     {
       "source": "/api/(.*)",
       "destination": {
