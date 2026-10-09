@@ -115,7 +115,18 @@ export class AuthService {
       data: { used: true },
     });
 
-    // Find or create user
+    return this.ensureUser(email);
+  }
+
+  async demoLogin(emailRaw: string): Promise<{ user: User }> {
+    const email = normalizeEmail(emailRaw);
+    if (!isValidEmail(email)) {
+      throw new Error('Please enter a valid email address.');
+    }
+    return this.ensureUser(email);
+  }
+
+  private async ensureUser(email: string): Promise<{ user: User }> {
     let user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -129,7 +140,6 @@ export class AuthService {
         },
       });
 
-      // Seed mock credit card and credit score for this user
       await this.seedUserData(user.id);
     }
 

@@ -39,6 +39,28 @@ export class AuthController {
     }
   };
 
+  demoLogin = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const { email } = req.body;
+      const { user } = await this.authService.demoLogin(email);
+
+      const token = generateSessionToken(user.id, user.email);
+      setSessionCookie(res, token);
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          profileCompleted: user.profileCompleted,
+          currentStep: user.currentStep,
+        },
+      });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message || 'Demo login failed.' });
+    }
+  };
+
   logout = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     clearSessionCookie(res);
     res.json({ success: true, message: 'Logged out successfully.' });

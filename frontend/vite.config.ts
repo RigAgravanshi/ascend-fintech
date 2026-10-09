@@ -10,9 +10,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@shared': path.resolve(__dirname, '../shared'),
     },
+    // Prefer TypeScript sources over leftover CommonJS .js files in /shared
+    extensions: ['.ts', '.tsx', '.mjs', '.js', '.jsx', '.json'],
   },
   server: {
     port: 5173,
+    host: '127.0.0.1',
     proxy: {
       '/auth': {
         target: 'http://localhost:5000',

@@ -17,6 +17,7 @@ interface AuthContextType {
   setIsProfileModalOpen: (open: boolean) => void;
   requestCode: (email: string) => Promise<{ success: boolean; message: string }>;
   verifyCode: (email: string, code: string) => Promise<void>;
+  demoLogin: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<UserProfileDto | null>;
   updateStep: (step: number, data: Record<string, any>, file?: File) => Promise<UserProfileDto>;
@@ -105,6 +106,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const demoLogin = async (email: string): Promise<void> => {
+    const res = await fetch('/auth/demo-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Demo login failed.');
+    }
+
+    setUser(data.user);
+    const updatedProfile = await fetchProfile();
+    if (updatedProfile && !updatedProfile.profileCompleted) {
+      setIsProfileModalOpen(true);
+    }
+  };
+
   const logout = async (): Promise<void> => {
     try {
       await fetch('/auth/logout', { method: 'POST' });
@@ -170,6 +190,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsProfileModalOpen,
         requestCode,
         verifyCode,
+        demoLogin,
         logout,
         refreshProfile: fetchProfile,
         updateStep,

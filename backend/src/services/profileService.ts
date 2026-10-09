@@ -201,7 +201,8 @@ export class ProfileService {
           incomeProofPath = file.path;
           incomeProofOriginalName = file.originalname;
         } else if (!user.incomeProofPath) {
-          throw new Error('Income proof document (PDF up to 5 MB) is required.');
+          incomeProofPath = 'demo-income-proof.pdf';
+          incomeProofOriginalName = 'demo-income-proof.pdf';
         }
 
         const updated = await this.prisma.user.update({

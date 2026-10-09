@@ -99,6 +99,7 @@ const requireAuth = createAuthMiddleware(prisma);
 // ========================
 app.post('/auth/request-code', otpRequestRateLimiter, authController.requestCode);
 app.post('/auth/verify-code', authController.verifyCode);
+app.post('/auth/demo-login', authController.demoLogin);
 app.post('/auth/logout', authController.logout);
 app.get('/auth/me', requireAuth, authController.me);
 
@@ -140,6 +141,32 @@ if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
   app.get('*', (_req, res) => {
     res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+} else {
+  // Development: port 5000 is API-only. Visiting / used to 404 with a blank page.
+  app.get('/', (_req, res) => {
+    res.type('html').send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ascend API</title>
+  <style>
+    body { font-family: Segoe UI, system-ui, sans-serif; background: #05080e; color: #e2e8f0; display: flex; min-height: 100vh; align-items: center; justify-content: center; margin: 0; }
+    .card { max-width: 480px; padding: 32px; border: 1px solid #1c283c; border-radius: 16px; background: #0c121d; }
+    a { color: #00e599; }
+    code { background: #070a10; padding: 2px 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Ascend backend is running</h1>
+    <p>Port <code>5000</code> is the API, not the website. Open the demo app at:</p>
+    <p><a href="http://localhost:5173">http://localhost:5173</a></p>
+    <p>Health check: <a href="/api/health">/api/health</a></p>
+  </div>
+</body>
+</html>`);
   });
 }
 

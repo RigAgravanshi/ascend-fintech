@@ -7,6 +7,9 @@ dist/
 build/
 .output/
 
+# Accidental CommonJS emit next to shared TypeScript sources
+shared/*.js
+
 # Environment and sensitive secrets
 .env
 .env.local

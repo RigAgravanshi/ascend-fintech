@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Under18Modal } from './Under18Modal';
-import { DigiLockerSimModal } from './DigiLockerSimModal';
 import {
   Check,
   CheckCircle2,
-  Calendar,
-  ShieldCheck,
-  UserCheck,
-  Building2,
   Upload,
   AlertCircle,
   X,
-  FileText,
   Lock,
   ArrowRight,
-  ExternalLink,
 } from 'lucide-react';
 import { formatINR } from '../utils/formatters';
 
@@ -38,10 +31,7 @@ export const ProfileCompletionModal: React.FC = () => {
   const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
   const [isUnder18ModalOpen, setIsUnder18ModalOpen] = useState(false);
 
-  // Step 2 State
-  const [aadhaarInput, setAadhaarInput] = useState('');
-  const [kycConsent, setKycConsent] = useState(false);
-  const [isDigiLockerSimOpen, setIsDigiLockerSimOpen] = useState(false);
+  // Step 2 State (demo KYC — no DigiLocker)
 
   // Step 3 State
   const [fullName, setFullName] = useState('');
@@ -105,7 +95,7 @@ export const ProfileCompletionModal: React.FC = () => {
 
   const stepStatusList = [
     { num: 1, title: 'Date of Birth', done: isStep1Done },
-    { num: 2, title: 'KYC via DigiLocker', done: isStep2Done },
+    { num: 2, title: 'Demo identity check', done: isStep2Done },
     { num: 3, title: 'Personal & Income', done: isStep3Done },
     { num: 4, title: 'Bank Details', done: isStep4Done },
   ];
@@ -170,56 +160,43 @@ export const ProfileCompletionModal: React.FC = () => {
     }
   };
 
-  // STEP 2 SUBMISSION (DigiLocker)
-  const startDigiLockerKyc = async () => {
-    if (!kycConsent) {
-      setErrorMessage('Please accept the consent checkbox to begin DigiLocker KYC.');
-      return;
-    }
+  const completeDemoKyc = async () => {
     setErrorMessage('');
-
-    // If user entered Aadhaar number, validate format and checksum first
-    if (aadhaarInput.trim()) {
-      try {
-        const res = await fetch('/kyc/digilocker/verify-aadhaar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ aadhaarNumber: aadhaarInput }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || 'Aadhaar validation failed');
-        }
-      } catch (err: any) {
-        setErrorMessage(err.message);
-        return;
-      }
-    }
-
-    // Launch DigiLocker simulation modal
-    setIsDigiLockerSimOpen(true);
-  };
-
-  const handleDigiLockerSuccess = async (code: string) => {
+    setSuccessMessage('');
     setSubmitting(true);
     try {
-      const res = await fetch('/kyc/digilocker/callback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
+      await updateStep(2, {
+        digilockerVerified: true,
+        aadhaarLast4: '0000',
+        digilockerRef: `DEMO-KYC-${Date.now()}`,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'DigiLocker verification failed.');
-      }
       await refreshProfile();
-      setSuccessMessage('DigiLocker KYC successfully verified!');
+      setSuccessMessage('Demo identity check complete. No DigiLocker or Aadhaar was used.');
       setActiveStep(3);
     } catch (err: any) {
-      setErrorMessage(err.message || 'KYC callback error.');
+      setErrorMessage(err.message || 'Failed to complete demo KYC.');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const fillDemoPersonal = () => {
+    setFullName('Kabir Sharma');
+    setPhone('9876543210');
+    setAddressStreet('Flat 402, Green Meadows');
+    setAddressCity('Bengaluru');
+    setAddressState('Karnataka');
+    setAddressPincode('560001');
+    setAnnualIncome('1450000');
+    setIncomeSource('Salaried Professional');
+    setStep3Consent(true);
+  };
+
+  const fillDemoBank = () => {
+    setBankName('Regional Partner Bank');
+    setIfscCode('ABCD0123456');
+    setUpiId('kabir@partner');
+    setStep4Consent(true);
   };
 
   // STEP 3 SUBMISSION (Personal & Income Details)
@@ -253,11 +230,6 @@ export const ProfileCompletionModal: React.FC = () => {
       setErrorMessage('Please enter a valid annual income in INR.');
       return;
     }
-    if (!incomeProofFile && !profile.hasIncomeProof) {
-      setErrorMessage('Please upload your income proof document (PDF up to 5 MB).');
-      return;
-    }
-
     setSubmitting(true);
     try {
       await updateStep(
@@ -329,13 +301,6 @@ export const ProfileCompletionModal: React.FC = () => {
       <Under18Modal
         isOpen={isUnder18ModalOpen}
         onClose={() => setIsUnder18ModalOpen(false)}
-      />
-
-      <DigiLockerSimModal
-        isOpen={isDigiLockerSimOpen}
-        onClose={() => setIsDigiLockerSimOpen(false)}
-        onSuccess={handleDigiLockerSuccess}
-        onFailure={() => setErrorMessage('DigiLocker authentication was declined or cancelled.')}
       />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
@@ -449,7 +414,7 @@ export const ProfileCompletionModal: React.FC = () => {
                   </span>
                   <h3 className="text-lg font-bold text-white">
                     {activeStep === 1 && 'Date of Birth Verification'}
-                    {activeStep === 2 && 'Identity Verification via DigiLocker'}
+                    {activeStep === 2 && 'Demo identity check'}
                     {activeStep === 3 && 'Personal & Income Particulars'}
                     {activeStep === 4 && 'Disbursal Bank Details'}
                   </h3>
@@ -484,6 +449,13 @@ export const ProfileCompletionModal: React.FC = () => {
                   <p className="text-xs text-[#8b98aa]">
                     Please select your date of birth. You must be at least 18 years old to operate an Ascend account.
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => handleDobChange('1996-05-12')}
+                    className="text-[11px] text-[#00e599] hover:underline"
+                  >
+                    Use demo adult date of birth
+                  </button>
 
                   <div className="space-y-2">
                     <label className="block text-xs font-medium text-[#8b98aa]">Date of Birth</label>
@@ -525,67 +497,34 @@ export const ProfileCompletionModal: React.FC = () => {
                 </form>
               )}
 
-              {/* STEP 2: DigiLocker KYC */}
               {activeStep === 2 && (
                 <div className="space-y-5">
                   <div className="flex items-center space-x-2">
-                    <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold uppercase tracking-wider border border-blue-500/30">
-                      Sandbox Mock Mode
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold uppercase tracking-wider border border-emerald-500/30">
+                      Demo Mode
                     </span>
-                    <span className="text-xs text-[#8b98aa]">Official OAuth Partner Flow</span>
+                    <span className="text-xs text-[#8b98aa]">No DigiLocker, Aadhaar, or OTPs</span>
                   </div>
 
                   <div className="p-4 rounded-xl bg-[#090e18] border border-[#1c283c] space-y-3">
                     <h4 className="text-xs font-semibold text-white flex items-center">
                       <Lock className="w-3.5 h-3.5 mr-1.5 text-[#00e599]" />
-                      Privacy & Aadhaar Protection Notice
+                      Fictional identity step
                     </h4>
                     <p className="text-[11px] text-[#8b98aa] leading-relaxed">
-                      Ascend does NOT collect your Aadhaar OTP or password. You will authenticate exclusively on DigiLocker's secure portal. In accordance with UIDAI regulations, Ascend only stores the last 4 digits and digital document reference.
+                      This demo does not collect Aadhaar numbers, launch DigiLocker, or call any government APIs. Continue to mark identity as complete with placeholder data.
                     </p>
-                  </div>
-
-                  {/* Optional Aadhaar Number Format Test */}
-                  <div className="space-y-2 max-w-sm">
-                    <label className="block text-xs font-medium text-[#8b98aa]">
-                      Aadhaar Number (Optional Verification - 12 digits, Verhoeff Checksum)
-                    </label>
-                    <input
-                      type="text"
-                      maxLength={12}
-                      value={aadhaarInput}
-                      onChange={(e) => setAadhaarInput(e.target.value.replace(/\D/g, ''))}
-                      placeholder="e.g. 543210987654"
-                      className="w-full px-4 py-2.5 rounded-xl bg-[#090e18] border border-[#1c283c] text-white tracking-widest font-mono text-sm focus:outline-none focus:border-[#00e599]"
-                    />
-                    <span className="text-[10px] text-[#64748b]">
-                      * Full number is never stored. Only last 4 digits are recorded.
-                    </span>
-                  </div>
-
-                  {/* Consent Checkbox */}
-                  <div className="flex items-start space-x-3 pt-2">
-                    <input
-                      type="checkbox"
-                      id="kycConsent"
-                      checked={kycConsent}
-                      onChange={(e) => setKycConsent(e.target.checked)}
-                      className="mt-0.5 rounded border-[#1c283c] bg-[#090e18] text-[#00e599] focus:ring-0"
-                    />
-                    <label htmlFor="kycConsent" className="text-xs text-[#cbd5e1] leading-relaxed cursor-pointer">
-                      I give voluntary consent to authenticate my identity via DigiLocker / API Setu and permit Ascend to verify my Aadhaar e-document.
-                    </label>
                   </div>
 
                   <div className="pt-3">
                     <button
                       type="button"
                       disabled={submitting}
-                      onClick={startDigiLockerKyc}
+                      onClick={completeDemoKyc}
                       className="px-6 py-2.5 rounded-xl bg-[#00e599] hover:bg-[#10b981] text-black font-semibold text-xs transition-all shadow-neon-sm flex items-center space-x-2 disabled:opacity-50"
                     >
-                      <ExternalLink className="w-4 h-4" />
-                      <span>Launch DigiLocker Authentication</span>
+                      <span>{submitting ? 'Saving...' : 'Continue with demo KYC'}</span>
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -711,8 +650,16 @@ export const ProfileCompletionModal: React.FC = () => {
 
                   {/* PDF Upload */}
                   <div className="space-y-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={fillDemoPersonal}
+                      className="text-[11px] text-[#00e599] hover:underline"
+                    >
+                      Fill demo personal details
+                    </button>
+
                     <label className="block text-xs font-medium text-[#8b98aa]">
-                      Upload Income Proof (PDF Only, Magic Bytes Verified, Max 5 MB)
+                      Income Proof (optional in demo — PDF up to 5 MB)
                     </label>
                     <div className="border border-dashed border-[#1c283c] hover:border-[#00e599]/50 rounded-xl p-4 bg-[#090e18] text-center cursor-pointer transition-colors relative">
                       <input
@@ -782,6 +729,14 @@ export const ProfileCompletionModal: React.FC = () => {
                       Ascend does NOT claim account is verified. Details are stored in encrypted format for future disbursal processing.
                     </p>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={fillDemoBank}
+                    className="text-[11px] text-[#00e599] hover:underline"
+                  >
+                    Fill demo bank details
+                  </button>
 
                   <div className="space-y-1">
                     <label className="block text-xs font-medium text-[#8b98aa]">

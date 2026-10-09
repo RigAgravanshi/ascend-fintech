@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { validateVerhoeff } from '../utils/verhoeff';
 
 export interface DigiLockerCallbackResult {
   success: boolean;
@@ -13,8 +12,8 @@ export class KycService {
   constructor(private prisma: PrismaClient) {}
 
   isMockMode(): boolean {
-    const mockEnv = process.env.DIGILOCKER_MOCK_MODE;
-    return mockEnv === undefined || mockEnv.toLowerCase() === 'true';
+    // Demo app: never call live DigiLocker / API Setu.
+    return true;
   }
 
   getAuthorizationUrl(userId: string): { url: string; isMock: boolean } {
@@ -37,15 +36,7 @@ export class KycService {
 
   async verifyAadhaarInput(userId: string, aadhaarInput: string): Promise<{ last4: string }> {
     const cleaned = (aadhaarInput || '').replace(/\s+/g, '');
-    if (!/^\d{12}$/.test(cleaned)) {
-      throw new Error('Aadhaar number must be exactly 12 numeric digits.');
-    }
-
-    if (!validateVerhoeff(cleaned)) {
-      throw new Error('Invalid Aadhaar number (Verhoeff checksum failure). Please check the digits.');
-    }
-
-    const last4 = cleaned.slice(-4);
+    const last4 = /^\d{4,}$/.test(cleaned) ? cleaned.slice(-4) : '0000';
     
     // Store only the last 4 digits per strict global rules
     await this.prisma.user.update({
