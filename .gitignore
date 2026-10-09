@@ -11,15 +11,14 @@ build/
 shared/*.js
 
 # Environment and sensitive secrets
-.env
+
 .env.local
 .env.production
-*.env
+
 
 # SQLite local databases
-*.db
+
 *.db-journal
-backend/prisma/dev.db
 backend/prisma/dev.db-journal
 
 # Uploads directory contents (preserve folder structure via .gitkeep)
